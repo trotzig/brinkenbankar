@@ -1,4 +1,4 @@
-// Import the playwright library into our scraper.
+const fs = require('fs');
 const playwright = require('playwright');
 
 const recipesSelector =
@@ -21,9 +21,10 @@ async function main() {
     const imageUrl = await image.getAttribute('src');
     const anchor = await item.$('a');
     const url = await anchor.getAttribute('href');
-    all.push(title, imageUrl, url);
+    all.push({ title, imageUrl, url });
   }
   console.log(all);
+  fs.writeFileSync('data.json', JSON.stringify(all), 'utf-8');
   await browser.close();
 }
 

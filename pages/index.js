@@ -1,6 +1,42 @@
-import Head from 'next/head'
+import Head from 'next/head';
+import { useState } from 'react';
+
+import data from '../data.json';
+const loadingTexts = [
+  'slumpar recept...',
+  'ignorerar kakor...',
+  'dubbelfriterar touchbaren...',
+  'bakar saffransloopen...',
+];
 
 export default function Home() {
+  const [current, setCurrent] = useState();
+  const [loadingText, setLoadingText] = useState();
+  const [stage, setStage] = useState('initial');
+
+  async function start() {
+    window.scrollTo(0, 0);
+    setStage('running');
+    setLoadingText('initialiserar kodsnittar...');
+    await new Promise(r => setTimeout(r, 2000));
+    setLoadingText('laddar recept...');
+    await new Promise(r => setTimeout(r, 1000));
+    const step = loadingTexts.length / (data.length * 3);
+    let i = 0;
+    for (const item of data.concat(data).concat(data)) {
+      const c = Math.floor(i * step);
+      setLoadingText(
+        `[${c + 1}/${loadingTexts.length}] ${loadingTexts[Math.floor(i * step)]}`,
+      );
+      setCurrent(item);
+      await new Promise(r => setTimeout(r, 100));
+      i++;
+    }
+    const theOne = data[Math.floor(Math.random() * data.length)];
+    setCurrent(theOne);
+    setStage('done');
+  }
+
   return (
     <div className="container">
       <Head>
@@ -9,9 +45,47 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className="title">
-          Låt Brinken Bakar bestämma din nyårsdessert!
-        </h1>
+        <h1 className="title">Låt Brinken Bakar bestämma din nyårsdessert!</h1>
+
+        {stage === 'initial' ? (
+          <button className="fade-in" onClick={() => start()}>
+            Överraska mig!
+          </button>
+        ) : stage === 'done' ? (
+          <p className="fade-in">Grattis! Du ska bjuda på:</p>
+        ) : (
+          <p className="fade-in">
+            <code>{loadingText}</code>
+          </p>
+        )}
+
+        {current && (
+          <div className={`card ${stage === 'done' ? 'fade-in' : ''}`}>
+            <a href={current.url} target="_blank" rel="noopener noreferrer">
+              <img src={current.imageUrl} />
+              <h2>{current.title}</h2>
+              {stage === 'done' && <button>Klicka för recept!</button>}
+            </a>
+          </div>
+        )}
+
+        {stage === 'done' && (
+          <p className="fade-in">
+            <small>
+              Inte nöjd? Du kan{' '}
+              <a
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  start();
+                }}
+              >
+                försöka igen genom att klicka här
+              </a>
+              .
+            </small>
+          </p>
+        )}
       </main>
 
       <footer>
@@ -39,8 +113,39 @@ export default function Home() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: center;
           align-items: center;
+          max-width: 450px;
+          text-align: center;
+        }
+
+        h1 {
+          margin-bottom: 10px;
+        }
+
+        .card {
+          width: 300px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+
+        .card img {
+          max-width: 100%;
+        }
+
+        .card button {
+          cursor: pointer;
+        }
+
+        button {
+          all: unset;
+          background-color: #000;
+          color: #fff;
+          line-height: 40px;
+          font-size: 20px;
+          padding: 0 15px;
+          min-width: 120px;
+          cursor: pointer;
+          border-radius: 3px;
         }
 
         footer {
@@ -62,6 +167,18 @@ export default function Home() {
           color: inherit;
           text-decoration: none;
         }
+        @keyframes fadein {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .fade-in {
+          animation: fadein 0.3s;
+          transition: opacity 0.3s;
+        }
       `}</style>
 
       <style jsx global>{`
@@ -79,5 +196,5 @@ export default function Home() {
         }
       `}</style>
     </div>
-  )
+  );
 }
