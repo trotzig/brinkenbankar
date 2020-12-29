@@ -7,9 +7,18 @@
     "build": "next build",
     "start": "next start"
   },
+  "prettier": {
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
+  },
   "dependencies": {
     "next": "^10.0.0",
     "react": "16.13.1",
     "react-dom": "16.13.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.7.1"
   }
 }
